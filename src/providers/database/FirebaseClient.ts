@@ -1,12 +1,12 @@
-import { FirebaseFirestore } from '@firebase/firestore-types';
-import { ResourceManager, IResource } from './ResourceManager';
-import { RAFirebaseOptions } from 'index';
-import { log, logError } from '../../misc/logger';
-import { sortArray, filterArray } from '../../misc/arrayHelpers';
-import { IFirebaseWrapper } from './firebase/IFirebaseWrapper';
-import { IFirebaseClient } from './IFirebaseClient';
-import { messageTypes } from '../../misc/messageTypes';
-import { joinPaths } from '../../misc/pathHelper';
+import { FirebaseFirestore } from "@firebase/firestore-types";
+import { ResourceManager, IResource } from "./ResourceManager";
+import { RAFirebaseOptions } from "index";
+import { log, logError } from "../../misc/logger";
+import { sortArray, filterArray } from "../../misc/arrayHelpers";
+import { IFirebaseWrapper } from "./firebase/IFirebaseWrapper";
+import { IFirebaseClient } from "./IFirebaseClient";
+import { messageTypes } from "../../misc/messageTypes";
+import { joinPaths } from "../../misc/pathHelper";
 
 export class FirebaseClient implements IFirebaseClient {
   private db: FirebaseFirestore;
@@ -23,15 +23,15 @@ export class FirebaseClient implements IFirebaseClient {
     resourceName: string,
     params: messageTypes.IParamsGetList
   ): Promise<messageTypes.IResponseGetList> {
-    log('apiGetList', { resourceName, params });
-    const r = await this.tryGetResource(resourceName, 'REFRESH');
+    log("apiGetList", { resourceName, params });
+    const r = await this.tryGetResource(resourceName, "REFRESH");
     const data = r.list;
     if (params.sort != null) {
       const { field, order } = params.sort;
-      if (order === 'ASC') {
-        sortArray(data, field, 'asc');
+      if (order === "ASC") {
+        sortArray(data, field, "asc");
       } else {
-        sortArray(data, field, 'desc');
+        sortArray(data, field, "desc");
       }
     }
     const filteredData = filterArray(data, params.filter);
@@ -48,13 +48,13 @@ export class FirebaseClient implements IFirebaseClient {
     resourceName: string,
     params: messageTypes.IParamsGetOne
   ): Promise<messageTypes.IResponseGetOne> {
-    log('apiGetOne', { resourceName, params });
+    log("apiGetOne", { resourceName, params });
     try {
       const data = await this.rm.GetSingleDoc(resourceName, params.id);
       return { data: data };
     } catch (error) {
       throw new Error(
-        'Error getting id: ' + params.id + ' from collection: ' + resourceName
+        "Error getting id: " + params.id + " from collection: " + resourceName
       );
     }
   }
@@ -63,14 +63,14 @@ export class FirebaseClient implements IFirebaseClient {
     params: messageTypes.IParamsCreate
   ): Promise<messageTypes.IResponseCreate> {
     const r = await this.tryGetResource(resourceName);
-    log('apiCreate', { resourceName, resource: r, params });
+    log("apiCreate", { resourceName, resource: r, params });
     const currentUserEmail = await this.getCurrentUserEmail();
     const hasOverridenDocId = params.data && params.data.id;
     if (hasOverridenDocId) {
       const overridenId = params.data.id;
       const data = await this.parseDataAndUpload(r, overridenId, params.data);
       if (!overridenId) {
-        throw new Error('id must be a valid string');
+        throw new Error("id must be a valid string");
       }
       const docObj = {
         ...data,
@@ -87,7 +87,7 @@ export class FirebaseClient implements IFirebaseClient {
         }
       };
     }
-    const newId = this.db.collection('collections').doc().id;
+    const newId = this.db.collection("collections").doc().id;
     const data = await this.parseDataAndUpload(r, newId, params.data);
     const docObj = {
       ...data,
@@ -96,6 +96,9 @@ export class FirebaseClient implements IFirebaseClient {
       createdby: currentUserEmail,
       updatedby: currentUserEmail
     };
+
+    log("apiCreate", { docObj });
+
     await r.collection.doc(newId).set(docObj, { merge: false });
     return {
       data: {
@@ -111,7 +114,7 @@ export class FirebaseClient implements IFirebaseClient {
     const id = params.id;
     delete params.data.id;
     const r = await this.tryGetResource(resourceName);
-    log('apiUpdate', { resourceName, resource: r, params });
+    log("apiUpdate", { resourceName, resource: r, params });
     const currentUserEmail = await this.getCurrentUserEmail();
     const data = await this.parseDataAndUpload(r, id, params.data);
     r.collection
@@ -122,7 +125,7 @@ export class FirebaseClient implements IFirebaseClient {
         updatedby: currentUserEmail
       })
       .catch(error => {
-        logError('apiUpdate error', { error });
+        logError("apiUpdate error", { error });
       });
     return {
       data: {
@@ -137,7 +140,7 @@ export class FirebaseClient implements IFirebaseClient {
   ): Promise<messageTypes.IResponseUpdateMany> {
     delete params.data.id;
     const r = await this.tryGetResource(resourceName);
-    log('apiUpdateMany', { resourceName, resource: r, params });
+    log("apiUpdateMany", { resourceName, resource: r, params });
     const ids = params.ids;
     const currentUserEmail = await this.getCurrentUserEmail();
     const returnData = await Promise.all(
@@ -151,7 +154,7 @@ export class FirebaseClient implements IFirebaseClient {
             updatedby: currentUserEmail
           })
           .catch(error => {
-            logError('apiUpdateMany error', { error });
+            logError("apiUpdateMany error", { error });
           });
         return {
           ...data,
@@ -168,12 +171,12 @@ export class FirebaseClient implements IFirebaseClient {
     params: messageTypes.IParamsDelete
   ): Promise<messageTypes.IResponseDelete> {
     const r = await this.tryGetResource(resourceName);
-    log('apiDelete', { resourceName, resource: r, params });
+    log("apiDelete", { resourceName, resource: r, params });
     r.collection
       .doc(params.id)
       .delete()
       .catch(error => {
-        logError('apiDelete error', { error });
+        logError("apiDelete error", { error });
       });
     return {
       data: params.previousData
@@ -184,7 +187,7 @@ export class FirebaseClient implements IFirebaseClient {
     params: messageTypes.IParamsDeleteMany
   ): Promise<messageTypes.IResponseDeleteMany> {
     const r = await this.tryGetResource(resourceName);
-    log('apiDeleteMany', { resourceName, resource: r, params });
+    log("apiDeleteMany", { resourceName, resource: r, params });
     const returnData: { id: string }[] = [];
     const batch = this.db.batch();
     for (const id of params.ids) {
@@ -192,7 +195,7 @@ export class FirebaseClient implements IFirebaseClient {
       returnData.push({ id });
     }
     batch.commit().catch(error => {
-      logError('apiDeleteMany error', { error });
+      logError("apiDeleteMany error", { error });
     });
     return { data: returnData };
   }
@@ -200,8 +203,8 @@ export class FirebaseClient implements IFirebaseClient {
     resourceName: string,
     params: messageTypes.IParamsGetMany
   ): Promise<messageTypes.IResponseGetMany> {
-    const r = await this.tryGetResource(resourceName, 'REFRESH');
-    log('apiGetMany', { resourceName, resource: r, params });
+    const r = await this.tryGetResource(resourceName, "REFRESH");
+    log("apiGetMany", { resourceName, resource: r, params });
     const ids = params.ids;
     const matchDocSnaps = await Promise.all(
       ids.map(id => r.collection.doc(id).get())
@@ -217,18 +220,18 @@ export class FirebaseClient implements IFirebaseClient {
     resourceName: string,
     params: messageTypes.IParamsGetManyReference
   ): Promise<messageTypes.IResponseGetManyReference> {
-    const r = await this.tryGetResource(resourceName, 'REFRESH');
-    log('apiGetManyReference', { resourceName, resource: r, params });
+    const r = await this.tryGetResource(resourceName, "REFRESH");
+    log("apiGetManyReference", { resourceName, resource: r, params });
     const data = r.list;
     const targetField = params.target;
     const targetValue = params.id;
     const matches = data.filter(val => val[targetField] === targetValue);
     if (params.sort != null) {
       const { field, order } = params.sort;
-      if (order === 'ASC') {
-        sortArray(data, field, 'asc');
+      if (order === "ASC") {
+        sortArray(data, field, "asc");
       } else {
-        sortArray(data, field, 'desc');
+        sortArray(data, field, "desc");
       }
     }
     const pageStart = (params.pagination.page - 1) * params.pagination.perPage;
@@ -239,7 +242,7 @@ export class FirebaseClient implements IFirebaseClient {
   }
   private async tryGetResource(
     resourceName: string,
-    refresh?: 'REFRESH'
+    refresh?: "REFRESH"
   ): Promise<IResource> {
     if (refresh) {
       await this.rm.RefreshResource(resourceName);
@@ -251,7 +254,7 @@ export class FirebaseClient implements IFirebaseClient {
     if (user) {
       return user.email;
     } else {
-      return 'annonymous user';
+      return "annonymous user";
     }
   }
 
@@ -268,13 +271,9 @@ export class FirebaseClient implements IFirebaseClient {
         if (isArray) {
           await Promise.all(
             (val as []).map((arrayObj, index) => {
-              if (!!val[index] && val[index].hasOwnProperty('rawFile')) {
+              if (!!val[index] && val[index].hasOwnProperty("rawFile")) {
                 return Promise.all([
-                  this.parseDataField(
-                    val[index],
-                    docPath,
-                    fieldName + index
-                  )
+                  this.parseDataField(val[index], docPath, fieldName + index)
                 ]);
               } else {
                 return Promise.all(
@@ -298,7 +297,7 @@ export class FirebaseClient implements IFirebaseClient {
   }
 
   private async parseDataField(ref: any, docPath: string, fieldPath: string) {
-    const hasRawFile = !!ref && ref.hasOwnProperty('rawFile');
+    const hasRawFile = !!ref && ref.hasOwnProperty("rawFile");
     if (!hasRawFile) {
       return;
     }
@@ -317,7 +316,7 @@ export class FirebaseClient implements IFirebaseClient {
   }
 
   private async saveFile(storagePath: string, rawFile: any): Promise<string> {
-    log('saveFile() saving file...', { storagePath, rawFile });
+    log("saveFile() saving file...", { storagePath, rawFile });
     const task = this.fireWrapper
       .storage()
       .ref(storagePath)
@@ -327,20 +326,20 @@ export class FirebaseClient implements IFirebaseClient {
         (res, rej) => task.then(res).catch(rej)
       );
       const getDownloadURL = await taskResult.ref.getDownloadURL();
-      log('saveFile() saved file', {
+      log("saveFile() saved file", {
         storagePath,
         taskResult,
         getDownloadURL
       });
       return getDownloadURL;
     } catch (storageError) {
-      if (storageError.code === 'storage/unknown') {
+      if (storageError.code === "storage/unknown") {
         logError(
           'saveFile() error saving file, No bucket found! Try clicking "Get Started" in firebase -> storage',
           { storageError }
         );
       } else {
-        logError('saveFile() error saving file', {
+        logError("saveFile() error saving file", {
           storageError
         });
       }
