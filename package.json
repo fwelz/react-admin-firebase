@@ -36,6 +36,7 @@
     "build": "rm -rf dist && microbundle",
     "watch": "microbundle watch",
     "start-demo": "cd src-demo && yarn start",
+    "prepare": "npm run build",
     "test": "jest --watchAll"
   },
   "files": [
