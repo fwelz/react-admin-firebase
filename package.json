@@ -3,7 +3,7 @@
   "description": "A firebase data provider for the React Admin framework",
   "version": "0.8.10",
   "dependencies": {
-    "firebase": "6.1.x",
+    "firebase": "^6.4.2",
     "path-browserify": "^1.0.0",
     "ra-realtime": "^2.8.x",
     "react": "^16.x",
