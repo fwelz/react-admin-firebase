@@ -1,11 +1,10 @@
 import { RAFirebaseOptions } from "providers/RAFirebaseOptions";
-import { FirebaseAuth } from "@firebase/auth-types";
-import { firestore } from 'firebase';
+import * as firebase from "firebase/app";
 
 export interface IFirebaseWrapper {
   init(firebaseConfig: {}, options: RAFirebaseOptions): void;
-  db(): firestore.Firestore;
+  db(): firebase.firestore.Firestore;
   storage(): firebase.storage.Storage;
-  auth(): FirebaseAuth;
+  auth(): firebase.auth.Auth;
   serverTimestamp(): any;
 }

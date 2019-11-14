@@ -8,7 +8,7 @@ import "firebase/storage";
 
 export class FirebaseWrapper implements IFirebaseWrapper {
   private firestore: firebase.firestore.Firestore;
-  private app;
+  private app: firebase.app.App;
 
   constructor() { }
 
@@ -30,7 +30,7 @@ export class FirebaseWrapper implements IFirebaseWrapper {
   }
 }
 
-function ObtainFirebaseApp(firebaseConfig: {}, options: RAFirebaseOptions) {
+function ObtainFirebaseApp(firebaseConfig: {}, options: RAFirebaseOptions): firebase.app.App {
   if (options.app) {
     return options.app;
   }

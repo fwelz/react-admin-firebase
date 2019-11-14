@@ -1,4 +1,5 @@
-import { FirebaseFirestore } from "@firebase/firestore-types";
+import * as firebase from "firebase/app";
+
 import { ResourceManager, IResource } from "./ResourceManager";
 import { RAFirebaseOptions } from "index";
 import { log, logError } from "../../misc/logger";
@@ -9,7 +10,7 @@ import { messageTypes } from "../../misc/messageTypes";
 import { joinPaths } from "../../misc/pathHelper";
 
 export class FirebaseClient implements IFirebaseClient {
-  private db: FirebaseFirestore;
+  private db: firebase.firestore.Firestore;
   private rm: ResourceManager;
 
   constructor(

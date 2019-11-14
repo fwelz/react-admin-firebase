@@ -1,5 +1,4 @@
-// import * as firebase from "firebase";
-import { FirebaseAuth } from "@firebase/auth-types";
+import * as firebase from "firebase/app";
 
 import {
   AUTH_LOGIN,
@@ -13,7 +12,7 @@ import { RAFirebaseOptions } from "./RAFirebaseOptions";
 import { FirebaseWrapper } from "./database/firebase/FirebaseWrapper";
 
 class AuthClient {
-  private auth: FirebaseAuth;
+  private auth: firebase.auth.Auth;
 
   constructor(firebaseConfig: {}, options: RAFirebaseOptions) {
     log("Auth Client: initializing...", {firebaseConfig, options});

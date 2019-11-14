@@ -1,19 +1,15 @@
 // Firebase types
-import {
-  CollectionReference,
-  QueryDocumentSnapshot,
-  FirebaseFirestore
-} from '@firebase/firestore-types';
+import * as firebase from "firebase/app";
+
 import { RAFirebaseOptions } from 'index';
 import { log } from '../../misc/logger';
 import { getAbsolutePath } from '../../misc/pathHelper';
 import { IFirebaseWrapper } from './firebase/IFirebaseWrapper';
-import { User } from '@firebase/auth-types';
 
 export interface IResource {
   path: string;
   pathAbsolute: string;
-  collection: CollectionReference;
+  collection: firebase.firestore.CollectionReference;
   list: Array<{}>;
 }
 
@@ -22,7 +18,7 @@ export class ResourceManager {
     [resourceName: string]: IResource;
   } = {};
 
-  private db: FirebaseFirestore;
+  private db: firebase.firestore.Firestore;
 
   constructor(
     private fireWrapper: IFirebaseWrapper,
@@ -96,7 +92,7 @@ export class ResourceManager {
     this.resources[relativePath] = resource;
   }
 
-  private parseFireStoreDocument(doc: QueryDocumentSnapshot): {} {
+  private parseFireStoreDocument(doc: firebase.firestore.QueryDocumentSnapshot): {} {
     const data = doc.data();
     Object.keys(data).forEach(key => {
       const value = data[key];
@@ -109,7 +105,7 @@ export class ResourceManager {
     return { id: doc.id, ...data };
   }
 
-  public async getUserLogin(): Promise<User> {
+  public async getUserLogin(): Promise<firebase.User> {
     return new Promise((resolve, reject) => {
       this.fireWrapper.auth().onAuthStateChanged(user => {
         resolve(user);

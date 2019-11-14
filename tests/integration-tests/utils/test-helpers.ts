@@ -1,4 +1,4 @@
-import { FirebaseFirestore } from "@firebase/firestore-types";
+import * as firebase from "firebase/app";
 
 import { IFirebaseWrapper } from '../../../src/providers/database/firebase/IFirebaseWrapper';
 import { FirebaseWrapperStub } from './FirebaseWrapperStub';
@@ -18,16 +18,16 @@ export function delayPromise(ms: number) {
   })
 }
 
-export async function deleteCollection(db: FirebaseFirestore, collectionName: string): Promise<void> {
+export async function deleteCollection(db: firebase.firestore.Firestore, collectionName: string): Promise<void> {
   const allDocs = await db.collection(collectionName).get();
   await Promise.all(allDocs.docs.map(doc => doc.ref.delete()));
 }
 
-export async function createDoc(db: FirebaseFirestore, collectionName: string, docName: string, obj: {}): Promise<void> {
+export async function createDoc(db: firebase.firestore.Firestore, collectionName: string, docName: string, obj: {}): Promise<void> {
   await db.collection(collectionName).doc(docName).set(obj);
 }
 
-export async function getDocsFromCollection(db: FirebaseFirestore, collectionName: string): Promise<any[]> {
+export async function getDocsFromCollection(db: firebase.firestore.Firestore, collectionName: string): Promise<any[]> {
   const allDocs = await db.collection(collectionName).get();
   const docsData = await Promise.all(allDocs.docs.map(doc => {
     return {
