@@ -2,32 +2,87 @@ function isEmptyObj(obj) {
   if (!obj) {
     return true;
   }
-  return JSON.stringify(obj) === '{}';
+  return JSON.stringify(obj) === "{}";
+}
+
+function isDate(value) {
+  if (value instanceof Date) {
+    return true;
+  }
+
+  if (typeof value === "object") {
+    if (value.seconds) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function getSeconds(value) {
+  if (!value) {
+    return 0;
+  }
+
+  if (typeof value === "object") {
+    if (value.seconds) {
+      return value.seconds;
+    }
+  }
+
+  if (value instanceof Date) {
+    return value.getTime() / 1000;
+  }
+
+  return 0;
+}
+
+function compareDates(dir, valueA, valueB) {
+  const aValue = getSeconds(valueA);
+  const bValue = getSeconds(valueB);
+
+  if (aValue > bValue) {
+    return dir === "asc" ? 1 : -1;
+  }
+
+  if (aValue < bValue) {
+    return dir === "asc" ? -1 : 1;
+  }
+
+  return 0;
 }
 
 export function sortArray(
   data: Array<{}>,
   field: string,
-  dir: 'asc' | 'desc'
+  dir: "asc" | "desc"
 ): void {
   data.sort((a: {}, b: {}) => {
     const rawA = a[field];
     const rawB = b[field];
     const isNumberField = Number.isFinite(rawA) && Number.isFinite(rawB);
+    const isDateField = isDate(rawA) && isDate(rawB);
+
     let aValue: string, bValue: string;
-    if (isNumberField) {
+
+    if (isDateField) {
+      return compareDates(dir, rawA, rawB);
+    } else if (isNumberField) {
       aValue = rawA;
       bValue = rawB;
     } else {
-      aValue = (a[field] || '').toString().toLowerCase();
-      bValue = (b[field] || '').toString().toLowerCase();
+      aValue = (a[field] || "").toString().toLowerCase();
+      bValue = (b[field] || "").toString().toLowerCase();
     }
+
     if (aValue > bValue) {
-      return dir === 'asc' ? 1 : -1;
+      return dir === "asc" ? 1 : -1;
     }
+
     if (aValue < bValue) {
-      return dir === 'asc' ? -1 : 1;
+      return dir === "asc" ? -1 : 1;
     }
+
     return 0;
   });
 }
@@ -44,7 +99,7 @@ export function filterArray(
     fieldNames.reduce((previousMatched, fieldName) => {
       let fieldVal = filterFields[fieldName];
       if (fieldVal == null || fieldVal == undefined) {
-        fieldVal = '';
+        fieldVal = "";
       }
       const fieldSearchText = fieldVal.toString().toLowerCase();
       const dataFieldValue = item[fieldName];
