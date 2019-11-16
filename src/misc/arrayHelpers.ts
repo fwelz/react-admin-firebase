@@ -1,3 +1,5 @@
+import { get } from "lodash";
+
 function isEmptyObj(obj) {
   if (!obj) {
     return true;
@@ -58,8 +60,8 @@ export function sortArray(
   dir: "asc" | "desc"
 ): void {
   data.sort((a: {}, b: {}) => {
-    const rawA = a[field];
-    const rawB = b[field];
+    const rawA = get(a, field);
+    const rawB = get(b, field);
     const isNumberField = Number.isFinite(rawA) && Number.isFinite(rawB);
     const isDateField = isDate(rawA) && isDate(rawB);
 
