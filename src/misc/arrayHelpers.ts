@@ -1,4 +1,4 @@
-import { get } from "lodash";
+import { get, filter } from "lodash";
 
 function isEmptyObj(obj) {
   if (!obj) {
@@ -96,23 +96,26 @@ export function filterArray(
   if (isEmptyObj(filterFields)) {
     return data;
   }
-  const fieldNames = Object.keys(filterFields);
-  return data.filter(item =>
-    fieldNames.reduce((previousMatched, fieldName) => {
-      let fieldVal = filterFields[fieldName];
-      if (fieldVal == null || fieldVal == undefined) {
-        fieldVal = "";
-      }
-      const fieldSearchText = fieldVal.toString().toLowerCase();
-      const dataFieldValue = item[fieldName];
-      if (dataFieldValue == null) {
-        return false;
-      }
-      const currentIsMatched = dataFieldValue
-        .toString()
-        .toLowerCase()
-        .includes(fieldSearchText);
-      return previousMatched || currentIsMatched;
-    }, false)
-  );
+
+  return filter(data, filterFields);
+
+  // const fieldNames = Object.keys(filterFields);
+  // return data.filter(item =>
+  //   fieldNames.reduce((previousMatched, fieldName) => {
+  //     let fieldVal = filterFields[fieldName];
+  //     if (fieldVal == null || fieldVal == undefined) {
+  //       fieldVal = "";
+  //     }
+  //     const fieldSearchText = fieldVal.toString().toLowerCase();
+  //     const dataFieldValue = item[fieldName];
+  //     if (dataFieldValue == null) {
+  //       return false;
+  //     }
+  //     const currentIsMatched = dataFieldValue
+  //       .toString()
+  //       .toLowerCase()
+  //       .includes(fieldSearchText);
+  //     return previousMatched || currentIsMatched;
+  //   }, false)
+  // );
 }
