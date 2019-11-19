@@ -1,4 +1,4 @@
-import { get, filter } from "lodash";
+import { get, filter, pickBy, identity } from "lodash";
 
 function isEmptyObj(obj) {
   if (!obj) {
@@ -97,7 +97,9 @@ export function filterArray(
     return data;
   }
 
-  return filter(data, filterFields);
+  const filters = pickBy(filterFields, identity);
+
+  return filter(data, filters);
 
   // const fieldNames = Object.keys(filterFields);
   // return data.filter(item =>
