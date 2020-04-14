@@ -1,10 +1,10 @@
 // Firebase types
 import * as firebase from "firebase/app";
 
-import { RAFirebaseOptions } from 'index';
-import { log } from '../../misc/logger';
-import { getAbsolutePath } from '../../misc/pathHelper';
-import { IFirebaseWrapper } from './firebase/IFirebaseWrapper';
+import { RAFirebaseOptions } from "index";
+import { log } from "../../misc/logger";
+import { getAbsolutePath } from "../../misc/pathHelper";
+import { IFirebaseWrapper } from "./firebase/IFirebaseWrapper";
 
 export interface IResource {
   path: string;
@@ -51,9 +51,9 @@ export class ResourceManager {
   public async RefreshResource(relativePath: string) {
     await this.initPath(relativePath);
     const resource = this.resources[relativePath];
-    log('resourceManager.RefreshResource', { relativePath });
+    log("resourceManager.RefreshResource", { relativePath });
     const newDocs = await resource.collection.get();
-    resource.list = newDocs.docs.map(doc => this.parseFireStoreDocument(doc));
+    resource.list = newDocs.docs.map((doc) => this.parseFireStoreDocument(doc));
   }
 
   public async GetSingleDoc(relativePath: string, docId: string) {
@@ -69,9 +69,20 @@ export class ResourceManager {
 
   private async initPath(relativePath: string): Promise<void> {
     const absolutePath = getAbsolutePath(this.options.rootRef, relativePath);
-    log('resourceManager.initPath:::', { absolutePath });
+    log("resourceManager.initPath:::", { absolutePath });
     const isAccessible = await this.isCollectionAccessible(absolutePath);
     const hasBeenInited = this.resources[relativePath];
+
+    if (hasBeenInited) {
+      if (hasBeenInited.pathAbsolute !== absolutePath) {
+        log("resourceManager.initPath:::absolutePath changing");
+
+        const list: Array<{}> = [];
+        hasBeenInited.pathAbsolute = absolutePath;
+        hasBeenInited.list = list;
+      }
+    }
+
     if (!isAccessible) {
       if (hasBeenInited) {
         this.removeResource(relativePath);
@@ -87,14 +98,16 @@ export class ResourceManager {
       collection: collection,
       list: list,
       path: relativePath,
-      pathAbsolute: absolutePath
+      pathAbsolute: absolutePath,
     };
     this.resources[relativePath] = resource;
   }
 
-  private parseFireStoreDocument(doc: firebase.firestore.QueryDocumentSnapshot): {} {
+  private parseFireStoreDocument(
+    doc: firebase.firestore.QueryDocumentSnapshot
+  ): {} {
     const data = doc.data();
-    Object.keys(data).forEach(key => {
+    Object.keys(data).forEach((key) => {
       const value = data[key];
       if (value && value.toDate && value.toDate instanceof Function) {
         data[key] = value.toDate();
@@ -107,7 +120,7 @@ export class ResourceManager {
 
   public async getUserLogin(): Promise<firebase.User> {
     return new Promise((resolve, reject) => {
-      this.fireWrapper.auth().onAuthStateChanged(user => {
+      this.fireWrapper.auth().onAuthStateChanged((user) => {
         resolve(user);
       });
     });
@@ -115,7 +128,7 @@ export class ResourceManager {
 
   private async isCollectionAccessible(absolutePath: string): Promise<boolean> {
     try {
-      await this.db.collection(absolutePath).doc('auth_test').get();
+      await this.db.collection(absolutePath).doc("auth_test").get();
     } catch (error) {
       return false;
     }
