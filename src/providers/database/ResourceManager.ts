@@ -45,6 +45,7 @@ export class ResourceManager {
         `react-admin-firebase: Cant find resource: "${relativePath}"`
       );
     }
+    log("!! TryGetResourcePromise", {resource});
     return resource;
   }
 
@@ -72,6 +73,8 @@ export class ResourceManager {
     log("resourceManager.initPath:::", { absolutePath });
     const isAccessible = await this.isCollectionAccessible(absolutePath);
     const hasBeenInited = this.resources[relativePath];
+
+    console.log("!!!", hasBeenInited, absolutePath);
 
     if (hasBeenInited) {
       if (hasBeenInited.pathAbsolute !== absolutePath) {
